@@ -64,7 +64,7 @@ def create_node(name, nodes):
   
   # Add extra storage space
   if (params.tempFileSystemSize > 0):
-    bs = node.Blockstore("bs", "/mydata")
+    bs = node.Blockstore(name + "bs", "/mydata")
     bs.size = str(params.tempFileSystemSize) + "GB"
     bs.placement = "any"
   
