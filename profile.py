@@ -1,3 +1,7 @@
+""" Ubuntu 20.04 Optional Kubernetes Cluster w/ OpenWhisk optionally deployed with a parameterized
+number of nodes.
+"""
+
 import geni.portal as portal
 # Import the ProtoGENI library.
 import geni.rspec.pg as rspec
