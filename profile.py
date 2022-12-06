@@ -37,7 +37,7 @@ pc.defineParameter("nodeCount",
 pc.defineParameter("masterIP", 
                    "Master ip address",
                    portal.ParameterType.STRING, 
-                   "172.1.1.1")
+                   "172.17.1.1")
 
 pc.defineParameter("tempFileSystemSize", 
                    "Temporary Filesystem Size",
@@ -69,7 +69,7 @@ def create_node(name, nodes):
   
   # Add extra storage space
   if (params.tempFileSystemSize > 0):
-    bs = node.Blockstore(name + "bs", "/mydata")
+    bs = node.Blockstore(name + "-bs", "/mydata")
     bs.size = str(params.tempFileSystemSize) + "GB"
     bs.placement = "any"
   
