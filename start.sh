@@ -24,36 +24,6 @@ popd
 
 sudo agent 30000 &
 
-# Start by recording the arguments
-printf "%s: args=(" "$(date +"%T.%N")"
-for var in "$@"
-do
-    printf "'%s' " "$var"
-done
-printf ")\n"
-
-# Kubernetes does not support swap, so we must disable it
-disable_swap
-
-# Use mountpoint (if it exists) to set up additional docker image storage
-if test -d "/mydata"; then
-    configure_docker_storage
-fi
-
-# Use second argument (node IP) to replace filler in kubeadm configuration
-sudo sed -i "s/REPLACE_ME_WITH_IP/$HOST_ETH0_IP/g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-
-
-# listen INVOKER_PORT
-
-coproc nc { nc -l $HOST_ETH0_IP $INVOKER_PORT; }
-
-setup_invoker $1
-
-sudo wondershaper -a eth0 -d $2 -u $2
-
-exit 0
-
 ## memory.memsw
 # sudo sed -i 's/GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1,/' /etc/default/grub
 # sudo update-grub
@@ -133,3 +103,33 @@ setup_invoker() {
     sudo apt-get update
     sudo apt install nfs-common -y
 }
+
+# Start by recording the arguments
+printf "%s: args=(" "$(date +"%T.%N")"
+for var in "$@"
+do
+    printf "'%s' " "$var"
+done
+printf ")\n"
+
+# Kubernetes does not support swap, so we must disable it
+disable_swap
+
+# Use mountpoint (if it exists) to set up additional docker image storage
+if test -d "/mydata"; then
+    configure_docker_storage
+fi
+
+# Use second argument (node IP) to replace filler in kubeadm configuration
+sudo sed -i "s/REPLACE_ME_WITH_IP/$HOST_ETH0_IP/g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+
+# listen INVOKER_PORT
+
+coproc nc { nc -l $HOST_ETH0_IP $INVOKER_PORT; }
+
+setup_invoker $1
+
+sudo wondershaper -a eth0 -d $2 -u $2
+
+exit 0
