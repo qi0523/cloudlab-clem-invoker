@@ -20,6 +20,9 @@ sudo apt install -y apparmor apparmor-utils
 pushd $INSTALL_DIR/install
 sudo wget https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
 sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.1.tgz
+
+sudo wget https://github.com/qi0523/distribution-agent/files/10229083/distribution-agent-1.1.1.tar.gz
+sudo tar Cxzvf /usr/local/bin distribution-agent-1.1.1.tar.gz
 popd
 
 sudo agent 30000 &
@@ -63,6 +66,10 @@ send_ip_to_master() {
     exec 3<&-
 }
 
+set_ip_to_master_py(){
+    sudo python /local/repository/client.py $1 $HOST_ETH0_IP
+}
+
 wait_join_k8s() {
     printf "%s: %s\n" "$(date +"%T.%N")" "nc pid is: $nc_PID"
     while true; do
@@ -95,7 +102,7 @@ wait_join_k8s() {
 setup_invoker() {
     # $1 == master ip
     #1. send host ip to master.
-    send_ip_to_master $1
+    set_ip_to_master_py $1
     #2. wait to join in k8s cluster.
     wait_join_k8s
 
@@ -131,5 +138,11 @@ coproc nc { nc -l $HOST_ETH0_IP $INVOKER_PORT; }
 setup_invoker $1
 
 sudo wondershaper -a eth0 -d $2 -u $2
+
+sudo sed -i "17a evictionHard:" /var/lib/kubelet/config.yaml
+sudo sed -i '18a \  nodefs.available: "0%"' /var/lib/kubelet/config.yaml
+sudo sed -i '19a \  imagefs.available: "0%"' /var/lib/kubelet/config.yaml
+sudo sed -i "28a imageGCHighThresholdPercent: 100" /var/lib/kubelet/config.yaml
+sudo systemctl restart kubelet
 
 exit 0
